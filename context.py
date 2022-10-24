@@ -34,7 +34,7 @@ class Context:
         price = get_last_price()
         timestamp = date()
         self.history.add_to_history(timestamp, price)
-        print("☀️Last price: {0}".format(price))
+        print("☀️ Last price: {0}".format(price))
 
     def is_price_up(self):
         return self.history.is_price_up()

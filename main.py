@@ -10,7 +10,7 @@ if __name__ == '__main__':
     i = 0
     while True:
         i += 1
-        print("-- Tick #{0}".format(i))
+        print("-- Tick #{0} --".format(i))
 
         context.refresh_last_price()
         context.refresh_deals()
@@ -19,7 +19,7 @@ if __name__ == '__main__':
             buy_id = context.open_deal()
 
         if context.is_price_up():
-            print("⏫️Price is UP")
+            print("🔼 ️Price is UP")
             buy_id = context.open_deal()
 
         if context.is_price_down():
