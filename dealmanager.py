@@ -1,6 +1,8 @@
+import datetime
+
 from trade import Trade
 from logger import log
-from util import generate_id, date
+from util import generate_id, date, date_to_str
 
 
 class DealInfo:
@@ -13,19 +15,19 @@ class DealInfo:
         self.total_sell: float = 0
         self.profit: float = 0
         self.status: str = 'none'
-        self.open_date: str = ''
-        self.close_date: str = ''
+        self.open_date: datetime.datetime = None
+        self.close_date: datetime.datetime = None
 
     def open_deal(self, buy_price: float, amount: float, buy_date: str) -> None:
         self.status = 'opened'
-        self.open_date = buy_date
+        self.open_date = datetime.datetime.fromisoformat(buy_date)
         self.buy_price = buy_price
         self.amount = amount
         self.total_buy = amount * buy_price
 
     def close_deal(self, sell_price: float, sell_date: str):
         self.status = 'closed'
-        self.close_date = sell_date
+        self.close_date = datetime.datetime.fromisoformat(sell_date)
         self.sell_price = sell_price
         self.total_sell = sell_price * self.amount
         self.profit = self.total_sell - self.total_buy
@@ -73,7 +75,7 @@ class DealManager:
         deal.close_deal(sell.price, sell.date)
         log.debug("Closed a deal: #%s with sell_price: %s, profit: %s", deal.id, deal.sell_price, deal.profit)
 
-    def get_opened_deals_with_price_less_than(self, price):
+    def get_opened_deals_with_price_less_than(self, price) -> list[int]:
         log.trace("Getting deals with price less than: %s", price)
 
         ids = []
@@ -90,8 +92,25 @@ class DealManager:
 
     def get_as_table_str(self) -> list[str]:
         result_list = list(map(lambda v: "{:<5} {:<20} {:<20} {:<24} {:<24}\n"
-                               .format(v.id, v.status, round(v.profit, 4), v.open_date, v.close_date), self.deals.values()))
+                               .format(v.id, v.status, round(v.profit, 4), date_to_str(v.open_date), date_to_str(v.close_date)),
+                               self.deals.values()))
         result_list.insert(0, "{:<5} {:<20} {:<20} {:<24} {:<24}\n"
                            .format("id", 'status', 'profit', 'open_date', 'close_date'))
-        result_list.append("TOTAL PROFIT: {0}".format(round(sum(map(lambda v: v.profit, self.deals.values())), 4)))
+        total_profit = sum(map(lambda v: v.profit, self.deals.values()))
+        result_list.append("TOTAL PROFIT: {0}".format(round(total_profit, 4)))
         return result_list
+
+    def get_opened_deals_with_date_less_than(self, date: datetime.datetime) -> list[int]:
+        log.trace("Getting deals with date less than: %s", date)
+
+        ids = []
+        open_deals_count = 0
+        for (id, deal) in self.deals.items():
+            if deal.is_open:
+                open_deals_count += 1
+                if deal.open_date < date:
+                    ids.append(id)
+
+        log.debug("Found %s/%s open deals with date less than: %s", len(ids), open_deals_count, date)
+
+        return ids

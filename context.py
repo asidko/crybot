@@ -1,5 +1,5 @@
-import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 import requests
 
@@ -18,6 +18,8 @@ def get_last_price():
 @dataclass
 class ContextProperties:
     buy_amount: float = 10
+    check_time_seconds: int = 30
+    deal_expire_seconds: int = 300
 
 
 class Context:
@@ -63,3 +65,8 @@ class Context:
 
     def refresh_deals(self):
         self.deal_manager.refresh_deals()
+
+    def get_deals_that_expired(self):
+        log.trace("Looking for expired deals")
+        expired_date = datetime.now() - timedelta(seconds=self.properties.deal_expire_seconds)
+        return self.deal_manager.get_opened_deals_with_date_less_than(expired_date)
