@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from history import History
 from logger import log
-from util import date, generate_id
+from util import date_str, generate_id
 
 
 @dataclass
@@ -22,12 +22,11 @@ class Trade:
     def buy(self, amount) -> Order:
         log.trace("Placing a BUY order for amount: %s", amount)
 
-        # TODO: this is a mock, we're buying by market price and will get it from API
-        buy_price = self.history.last_price
+        buy_price = self.history.last_price_to_buy
 
         buy = Order(
             id=generate_id(),
-            date=date(),
+            date=date_str(),
             price=buy_price,
             amount=amount
         )
@@ -37,12 +36,12 @@ class Trade:
 
     def sell(self, amount) -> Order:
         log.trace("Placing a SEL order by amount: %s", amount)
-        # TODO: this is a mock, we're buying by market price and will get it from API
-        sell_price = self.history.last_price
+
+        sell_price = self.history.last_price_to_sell
 
         sell = Order(
             id=generate_id(),
-            date=date(),
+            date=date_str(),
             price=sell_price,
             amount=amount
         )

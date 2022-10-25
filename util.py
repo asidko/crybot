@@ -10,7 +10,7 @@ def generate_id() -> int:
     return _generate_id
 
 
-def date():
+def date_str():
     return datetime.datetime.now().replace(microsecond=0).isoformat()
 
 
